@@ -61,7 +61,14 @@
     saveNow() { save(state); }
   };
 
+  function renderSiteMeta() {
+    const el = document.getElementById('site-meta');
+    if (!el || !BG.version) return;
+    el.innerHTML = '<span class="ver">v' + BG.version.current + '</span>' +
+      '<button type="button" class="ver-btn" data-act="changelog">更新公告</button>';
+  }
+
   window.addEventListener('beforeunload', () => { if (state) save(state); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && state) save(state); });
-  document.addEventListener('DOMContentLoaded', () => { BG.main.boot(); });
+  document.addEventListener('DOMContentLoaded', () => { renderSiteMeta(); BG.main.boot(); });
 })();

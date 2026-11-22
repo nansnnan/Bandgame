@@ -770,8 +770,28 @@
       '</div></div>';
   }
 
-  function showHelp() {
-    showModal('<div class="modal wide"><div class="mhead"><h2>玩法说明</h2><button class="close-x" data-act="close-modal">×</button></div>' +
+  function showChangelog() {
+    if (!BG.version) return;
+    const entries = BG.version.changelog.map((entry, idx) => {
+      const count = entry.items.length;
+      const kind = entry.kind || (count >= 11 ? '大更新' : count >= 6 ? '中更新' : '小更新');
+      const kindClass = entry.kind ? 'blue' : count >= 11 ? 'red' : count >= 6 ? 'amber' : 'green';
+      const badge = idx === 0 ? '<span class="pill green">当前版本</span>' : '<span class="pill ' + kindClass + '">' + kind + '</span>';
+      return '<div class="update-entry">' +
+        '<div class="update-head"><span class="version-badge">v' + esc(entry.version) + '</span>' + badge +
+        '<span class="update-date">' + esc(entry.date) + '</span></div>' +
+        '<h3>' + esc(entry.title) + '</h3>' +
+        '<ul class="update-list">' + entry.items.map(item => '<li>' + esc(item) + '</li>').join('') + '</ul>' +
+        '</div>';
+    }).join('');
+    showModal('<div class="modal wide"><div class="mhead"><div><div class="eyebrow">SITE UPDATES</div><h2>更新公告</h2></div>' +
+      '<div class="row"><span class="pill amber">v' + esc(BG.version.current) + '</span><button class="close-x" data-act="close-modal">×</button></div></div>' +
+      '<div class="mbody">' + entries +
+      '<div class="version-rules"><b>版本规则</b><br>每次更新按本次条目数量决定版本号：1–5 项为小更新，第三位 +1（如 v1.0.9 → v1.0.10）；6–10 项为中更新，第二位 +1 并清空第三位（如 v1.0.2 → v1.1.0）；11 项及以上为大更新，第一位 +1 并清空后两位（如 v1.2.3 → v2.0.0）。各位数字不设上限，也不做十进制进位。</div>' +
+      '</div><div class="mfoot"><button class="btn" data-act="close-modal">关闭</button></div></div>');
+  }
+
+  function showHelp() {    showModal('<div class="modal wide"><div class="mhead"><h2>玩法说明</h2><button class="close-x" data-act="close-modal">×</button></div>' +
       '<div class="mbody">' +
       '<h3 style="margin-bottom:6px">时间</h3><p class="sub">从 2026 年 1 月 1 日开始。写歌、录音、排练、休息和演出都会推进时间。每周结算专辑榜，每月 1 日结算固定开销。</p>' +
       '<h3 style="margin:14px 0 6px">创作</h3><p class="sub">自己决定歌名、时长、BPM、调性、主题、曲式、语言、歌词，以及每个乐器位置由谁负责。成员的演奏、创作能力与乐队默契决定 demo 质量；录音预算和制作人决定最终质感。</p>' +
@@ -914,6 +934,7 @@
 
   /* ---------------- events ---------------- */
   document.addEventListener('click', e => {
+    if (e.target.closest('[data-act="changelog"]')) { showChangelog(); return; }
     const el = e.target.closest('[data-act]');
     if (el) {
       const act = el.dataset.act;
@@ -989,6 +1010,7 @@
       }
       case 'release-detail': showReleaseDetail(target.dataset.id); break;
       case 'song-detail': showSongDetail(target.dataset.id); break;
+      case 'changelog': showChangelog(); break;
       case 'close-modal': closeModal(); break;
       case 'help': showHelp(); break;
       case 'export': downloadSave(); break;
